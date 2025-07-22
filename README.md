@@ -2,7 +2,6 @@
 
 <p align="center">
   <img  alt="SocioX" src="screenshots\SocioX.png" />
-
 </p>
 
 Socio X is a sleek, real-time chat application designed for seamless communication with modern UI/UX principles.
