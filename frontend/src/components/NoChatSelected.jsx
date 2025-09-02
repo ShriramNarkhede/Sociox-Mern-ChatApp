@@ -1,4 +1,5 @@
 import { MessageSquare } from "lucide-react";
+import logo2 from "../assets/logo2.png";
 
 const NoChatSelected = () => {
   return (
@@ -7,16 +8,16 @@ const NoChatSelected = () => {
         {/* Icon Display */}
         <div className="flex justify-center mb-4">
           <div className="relative">
-            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 animate-bounce">
-              <MessageSquare className="w-8 h-8 text-primary" />
+            <div className="flex items-center justify-center w-20 h-20">
+              <img src={logo2} alt="App logo" className="w-20 h-20 object-contain" />
             </div>
           </div>
         </div>
 
         {/* Welcome Text */}
-        <h2 className="text-2xl font-bold">Hey there, welcome to Socio-X!</h2>
+        <h2 className="text-2xl font-bold">Yo, welcome to SocioX 👋</h2>
         <p className="text-base-content/60">
-          Tap on a convo from the sidebar to start vibing! ✌️
+          Pick someone from the sidebar and shoot your shot. Real‑time vibes, zero lag.
         </p>
       </div>
     </div>

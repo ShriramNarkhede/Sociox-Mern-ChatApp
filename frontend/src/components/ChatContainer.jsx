@@ -28,14 +28,14 @@ const ChatContainer = () => {
   }, [selectedUser ._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
-    if (messageEndRef.current && messages.length) {
+    if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
   if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <ChatHeader />
         <MessageSkeleton />
         <MessageInput />
@@ -44,29 +44,29 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-base-100">
       <ChatHeader />
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.map((message) => (
           <ChatMessage 
             key={message._id} 
             message={message} 
             authUser ={authUser } 
             selectedUser ={selectedUser } 
-            messageEndRef={messageEndRef} 
           />
         ))}
+        <div ref={messageEndRef} />
       </div>
       <MessageInput />
     </div>
   );
 };
 
-const ChatMessage = ({ message, authUser , selectedUser , messageEndRef }) => {
+const ChatMessage = ({ message, authUser , selectedUser  }) => {
   return (
-    <div className={`chat ${message.senderId === authUser ._id ? "chat-end" : "chat-start"}`} ref={messageEndRef}>
+    <div className={`chat ${message.senderId === authUser ._id ? "chat-end" : "chat-start"}`}>
       <div className="chat-image avatar">
-        <div className="size-10 rounded-full border">
+        <div className="size-10 rounded-full border border-base-300">
           <img
             src={
               message.senderId === authUser ._id
@@ -78,16 +78,16 @@ const ChatMessage = ({ message, authUser , selectedUser , messageEndRef }) => {
         </div>
       </div>
       <div className="chat-header mb-1">
-        <time className="text-xs opacity-50 ml-1">
+        <time className="text-xs text-base-content/60 ml-1">
           {formatMessageTime(message.createdAt)}
         </time>
       </div>
-      <div className="chat-bubble flex flex-col">
+      <div className={`chat-bubble ${message.senderId === authUser ._id ? "bg-primary text-primary-content" : "bg-base-200 text-base-content"}`}>
         {message.image && (
           <img
             src={message.image}
             alt="Attachment"
-            className="sm:max-w-[200px] rounded-md mb-2"
+            className="sm:max-w-[200px] rounded-md mb-2 shadow"
           />
         )}
         {message.text && <p>{message.text}</p>}

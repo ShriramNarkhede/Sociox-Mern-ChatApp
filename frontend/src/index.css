@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .bg-app {
+    @apply bg-gradient-to-br from-sky-100 via-indigo-100 to-violet-100;
+  }
+  .neo-card {
+    box-shadow: 10px 10px 30px #d2d7e1, -10px -10px 30px #ffffff;
+    background: #f3f6fb;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 1.5rem;
+  }
+  .neo-inset {
+    box-shadow: inset 6px 6px 12px #d2d7e1, inset -6px -6px 12px #ffffff;
+    background: #f3f6fb;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 0.75rem;
+  }
+  .neo-input {
+    @apply px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-300;
+    box-shadow: inset 6px 6px 12px #d2d7e1, inset -6px -6px 12px #ffffff;
+    background: #f3f6fb;
+    border: 1px solid rgba(255,255,255,0.6);
+  }
+  .neo-btn {
+    @apply rounded-xl text-white font-semibold transition-all duration-200;
+    background-image: linear-gradient(90deg, #6366f1, #7c3aed);
+    box-shadow: 6px 6px 12px #d2d7e1, -6px -6px 12px #ffffff;
+  }
+  .neo-bubble {
+    border-radius: 1rem;
+    box-shadow: 6px 6px 12px rgba(0,0,0,0.08), -6px -6px 12px rgba(255,255,255,0.6);
+  }
+}

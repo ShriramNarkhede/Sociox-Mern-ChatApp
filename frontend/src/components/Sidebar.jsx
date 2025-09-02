@@ -20,10 +20,10 @@ const Sidebar = () => {
   if (isUsersLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-gray-300 flex flex-col transition-all duration-200 bg-white">
-      <div className="border-b border-gray-300 w-full p-5">
+    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200 bg-base-100">
+      <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
-          <Users className="w-6 h-6 text-gray-600" />
+          <Users className="w-6 h-6 text-base-content/80" />
           <span className="font-medium hidden lg:block">Contacts</span>
         </div>
         {/* Online filter toggle */}
@@ -37,7 +37,7 @@ const Sidebar = () => {
             />
             <span className="text-sm">Show online only</span>
           </label>
-          <span className="text-xs text-gray-500">({onlineUsers.length - 1} online)</span>
+          <span className="text-xs text-base-content/60">({onlineUsers.length - 1} online)</span>
         </div>
       </div>
 
@@ -48,8 +48,8 @@ const Sidebar = () => {
             onClick={() => setSelectedUser (user)}
             className={`
               w-full p-3 flex items-center gap-3
-              hover:bg-gray-100 transition-colors
-              ${selectedUser ?._id === user._id ? "bg-gray-100 ring-1 ring-gray-300" : ""}
+              hover:bg-base-200 transition-colors
+              ${selectedUser ?._id === user._id ? "bg-base-200 ring-1 ring-base-300" : ""}
             `}
           >
             <div className="relative mx-auto lg:mx-0">
@@ -60,8 +60,7 @@ const Sidebar = () => {
               />
               {onlineUsers.includes(user._id) && (
                 <span
-                  className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 
-                  rounded-full ring-2 ring-white"
+                  className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full ring-2 ring-base-100"
                 />
               )}
             </div>
@@ -69,7 +68,7 @@ const Sidebar = () => {
             {/* User info - only visible on larger screens */}
             <div className="hidden lg:block text-left min-w-0">
               <div className="font-medium truncate">{user.fullName}</div>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-base-content/60">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>
             </div>
@@ -77,7 +76,7 @@ const Sidebar = () => {
         ))}
 
         {filteredUsers.length === 0 && (
-          <div className="text-center text-gray-500 py-4">No users found</div>
+          <div className="text-center text-base-content/60 py-4">No users found</div>
         )}
       </div>
     </aside>

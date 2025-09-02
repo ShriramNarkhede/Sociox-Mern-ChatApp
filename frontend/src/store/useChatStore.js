@@ -2,6 +2,7 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
+import { showBrowserNotification } from "../lib/utils";
 
 export const useChatStore = create((set, get) => ({
   messages: [],
@@ -15,8 +16,12 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get("/messages/users");
       set({ users: res.data });
+      if (typeof window !== "undefined") {
+        window.__users = res.data;
+      }
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     } finally {
       set({ isUsersLoading: false });
     }
@@ -28,7 +33,8 @@ export const useChatStore = create((set, get) => ({
       const res = await axiosInstance.get(`/messages/${userId}`);
       set({ messages: res.data });
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     } finally {
       set({ isMessagesLoading: false });
     }
@@ -39,31 +45,52 @@ export const useChatStore = create((set, get) => ({
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
       set({ messages: [...messages, res.data] });
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     }
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
-
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      const { selectedUser, users } = get();
 
-      set({
-        messages: [...get().messages, newMessage],
+      const isFromOpenChat = selectedUser && newMessage.senderId === selectedUser._id;
+      if (isFromOpenChat) {
+        set({ messages: [...get().messages, newMessage] });
+        return;
+      }
+
+      const sender = (users || []).find((u) => u._id === newMessage.senderId);
+      const senderName = sender?.fullName || "Someone";
+      const preview = newMessage?.text?.slice(0, 80) || "Sent you a message";
+
+      toast.success(`${senderName}: ${preview}`);
+      showBrowserNotification(`${senderName}`, {
+        body: preview,
+        icon: sender?.profilePic || "/avatar.png",
       });
     });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
     socket.off("newMessage");
   },
   setMessages: (messages) => set({ messages }),
-  setUsers: (users) => set({ users }),
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setUsers: (users) => {
+    if (typeof window !== "undefined") {
+      window.__users = users;
+    }
+    set({ users });
+  },
+  setSelectedUser: (selectedUser) => {
+    if (typeof window !== "undefined") {
+      window.__selectedUser = selectedUser;
+    }
+    set({ selectedUser });
+  },
 }));

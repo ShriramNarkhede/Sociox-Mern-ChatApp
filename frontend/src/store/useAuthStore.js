@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { requestNotificationPermission } from "../lib/utils.js";
+import { showBrowserNotification } from "../lib/utils.js";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
 export const useAuthStore = create((set, get) => ({
@@ -19,6 +21,7 @@ export const useAuthStore = create((set, get) => ({
 
       set({ authUser: res.data });
       get().connectSocket();
+      await requestNotificationPermission();
     } catch (error) {
       console.log("Error in checkAuth:", error);
       set({ authUser: null });
@@ -34,8 +37,10 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: res.data });
       toast.success("Account created successfully");
       get().connectSocket();
+      await requestNotificationPermission();
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     } finally {
       set({ isSigningUp: false });
     }
@@ -49,8 +54,10 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Logged in successfully");
 
       get().connectSocket();
+      await requestNotificationPermission();
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     } finally {
       set({ isLoggingIn: false });
     }
@@ -63,7 +70,8 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Logged out successfully");
       get().disconnectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     }
   },
 
@@ -75,7 +83,8 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Profile updated successfully");
     } catch (error) {
       console.log("error in update profile:", error);
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || "Request failed";
+      toast.error(msg);
     } finally {
       set({ isUpdatingProfile: false });
     }
@@ -96,6 +105,31 @@ export const useAuthStore = create((set, get) => ({
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
+    });
+
+    // Global notifications: show on any page (e.g., homepage). Suppress only if current chat is open with sender.
+    socket.on("newMessage", (newMessage) => {
+      const selfId = get().authUser?._id;
+      if (newMessage?.senderId === selfId) return;
+
+      // Read currently selected chat and known users if available
+      const selected = typeof window !== "undefined" ? window.__selectedUser : null;
+      const users = typeof window !== "undefined" ? window.__users : [];
+
+      const isFromOpenChat = selected && newMessage.senderId === selected._id;
+      if (isFromOpenChat) return; // do not spam when in that chat
+
+      const sender = (users || []).find((u) => u._id === newMessage.senderId);
+      const senderName = sender?.fullName || "Someone";
+      const preview = newMessage?.text?.slice(0, 80) || "Sent you a message";
+
+      // Toast
+      toast.success(`${senderName}: ${preview}`);
+      // Browser notification if granted
+      showBrowserNotification(senderName, {
+        body: preview,
+        icon: sender?.profilePic || "/avatar.png",
+      });
     });
   },
   disconnectSocket: () => {
