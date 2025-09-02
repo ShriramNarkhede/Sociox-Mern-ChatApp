@@ -19,7 +19,7 @@ const __dirname = path.resolve();
 // Ensure CORS headers are applied even when body parsing fails
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (process.env.FRONTEND_URL || "http://localhost:5173").split(","),
     credentials: true,
   })
 );
