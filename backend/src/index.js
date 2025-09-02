@@ -16,13 +16,27 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
+// Debug: Log environment variables
+console.log("Environment check:");
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
+// Parse allowed origins
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173").split(",");
+console.log("Allowed CORS origins:", allowedOrigins);
+
 // Ensure CORS headers are applied even when body parsing fails
 app.use(
   cors({
-    origin: (process.env.FRONTEND_URL || "http://localhost:5173").split(","),
+    origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
+
+// Add CORS preflight handling
+app.options("*", cors());
 
 // Increase payload limits for JSON and URL-encoded forms
 app.use(express.json({ limit: "10mb" }));
@@ -43,5 +57,6 @@ if (process.env.NODE_ENV === "production") {
 
 server.listen(PORT, () => {
   console.log("server is running on PORT:" + PORT);
+  console.log("CORS configured for origins:", allowedOrigins);
   connectDB();
 });
