@@ -5,7 +5,9 @@ import { io } from "socket.io-client";
 import { requestNotificationPermission } from "../lib/utils.js";
 import { showBrowserNotification } from "../lib/utils.js";
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  (import.meta.env.MODE === "development" ? "http://localhost:5000" : "/");
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
@@ -94,7 +96,7 @@ export const useAuthStore = create((set, get) => ({
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
 
-    const socket = io(BASE_URL, {
+    const socket = io(SOCKET_URL, {
       query: {
         userId: authUser._id,
       },
