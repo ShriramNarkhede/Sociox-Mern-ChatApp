@@ -76,8 +76,14 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-server.listen(PORT, () => {
-  console.log("server is running on PORT:" + PORT);
-  console.log("CORS configured for origins:", allowedOrigins);
-  connectDB();
-});
+connectDB()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log("server is running on PORT:" + PORT);
+      console.log("CORS configured for origins:", allowedOrigins);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to start server due to DB error:", err?.message || err);
+    process.exit(1);
+  });
