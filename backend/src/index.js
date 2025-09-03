@@ -16,6 +16,11 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
+// Ensure Express knows it's behind a proxy in production (for secure cookies)
+if (process.env.NODE_ENV !== "development") {
+  app.set("trust proxy", 1);
+}
+
 // Debug: Log environment variables
 console.log("Environment check:");
 console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
@@ -35,8 +40,24 @@ app.use(
   })
 );
 
-// Add CORS preflight handling
-app.options("*", cors());
+// Harden CORS: ensure headers are present on every response and short-circuit preflights
+app.use((req, res, next) => {
+  const requestOrigin = req.headers.origin;
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    res.header("Access-Control-Allow-Origin", requestOrigin);
+    res.header("Vary", "Origin");
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Cookie, X-Requested-With"
+  );
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 // Increase payload limits for JSON and URL-encoded forms
 app.use(express.json({ limit: "10mb" }));
